@@ -1,0 +1,43 @@
+services:
+  file-storage:
+    build:
+      context: .
+      dockerfile: FileStorageService/Dockerfile
+    environment:
+      STORAGE_DATA_DIR: /data
+    volumes:
+      - storage_data:/data
+    ports:
+      - "5001:8080"
+
+  file-analysis:
+    build:
+      context: .
+      dockerfile: FileAnalysisService/Dockerfile
+    environment:
+      ANALYSIS_DATA_DIR: /data
+    volumes:
+      - analysis_data:/data
+    ports:
+      - "5002:8080"
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    environment:
+      GATEWAY_DATA_DIR: /data
+      Storage__BaseUrl: http://file-storage:8080
+      Analysis__BaseUrl: http://file-analysis:8080
+    volumes:
+      - gateway_data:/data
+    ports:
+      - "5000:8080"
+    depends_on:
+      - file-storage
+      - file-analysis
+
+volumes:
+  storage_data:
+  analysis_data:
+  gateway_data:
